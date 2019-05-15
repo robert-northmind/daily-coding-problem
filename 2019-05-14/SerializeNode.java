@@ -3,14 +3,18 @@ import java.util.*;
 class SerializeNodes {
     public static void main(String[] args) {
         Node testNode = new Node("root", new Node("left", new Node("left.left"), null), new Node("right"));
-        System.out.println("testNode: " + Node.serialize(testNode));
+        
+        String serialized = Node.serialize(testNode);
+        Node deserialized = Node.deserialize(serialized);
+
+        System.out.println("Deserialized: " + deserialized.left.left.value);
     }
 }
 
 class Node {
-    private String value;
-    private Node left;
-    private Node right;
+    public String value;
+    public Node left;
+    public Node right;
 
     Node(String value) {
         this.value = value;
@@ -40,15 +44,56 @@ class Node {
     }
 
     public static Node deserialize(String nodeStr) {
-        for (int i = 0; i < nodeStr.length(); i++) {
-            char ch = nodeStr.charAt(i);
-            if (ch == '(') {
-                String subString = nodeStr.substring(i);
-                return Node.deserialize(subString);
-            } else {
+        return Node.internalSerialize(nodeStr, 0).node;
+    }
 
-            }
+    private static NodeSerial internalSerialize(String nodeStr, int index) {
+        char ch = nodeStr.charAt(index);
+        if (ch != '(') {
+            return new NodeSerial(index+1, null);
         }
-        return new Node("");
+
+        String value = "";
+        Node left = null;
+        Node right = null;
+
+        index++;
+        ch = nodeStr.charAt(index);
+        while (ch != ',') {
+            value += ch;
+            index++;
+            ch = nodeStr.charAt(index);
+        }
+
+        index++;
+        ch = nodeStr.charAt(index);
+
+        if (ch == '(') {
+            NodeSerial nodeSerial = Node.internalSerialize(nodeStr, index);
+            left = nodeSerial.node;
+            index = nodeSerial.index;
+        }
+
+        index++;
+        ch = nodeStr.charAt(index);
+
+        if (ch == '(') {
+            NodeSerial nodeSerial = Node.internalSerialize(nodeStr, index);
+            right = nodeSerial.node;
+            index = nodeSerial.index;
+        }
+
+        index++;
+
+        return new NodeSerial(index,new Node(value, left, right));
+    }
+}
+
+class NodeSerial {
+    public int index;
+    public Node node;
+    NodeSerial(int index, Node node) {
+        this.index = index;
+        this.node = node;
     }
 }
