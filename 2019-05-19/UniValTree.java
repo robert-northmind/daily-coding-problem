@@ -8,7 +8,7 @@ class UniValTree {
         MyNode right = new MyNode(rightleft, rightright, 0);
         MyNode node = new MyNode(left, right, 0);
 
-        int nbrUniVal = node.nbrUniValNodes();
+        int nbrUniVal = node.nbrUniValNodesFast();
         System.out.println("nbrUniVal: " + nbrUniVal);
     }
 }
@@ -45,6 +45,19 @@ class MyNode {
         }
         if (this.right != null) {
             nbrUniVal += right.nbrUniValNodes();
+        }
+        return nbrUniVal;
+    }
+
+    public int nbrUniValNodesFast() {
+        if (this.left == null && this.right == null) {
+            return 1;
+        }
+        int leftNbrUniVal = this.left != null ? left.nbrUniValNodesFast() : 0;
+        int rightNbrUniVal = this.right != null ? right.nbrUniValNodesFast() : 0;
+        int nbrUniVal = leftNbrUniVal + rightNbrUniVal;
+        if (leftNbrUniVal > 0 && rightNbrUniVal > 0 && this.left.value == this.value && this.right.value == this.value) {
+            nbrUniVal += 1;
         }
         return nbrUniVal;
     }
